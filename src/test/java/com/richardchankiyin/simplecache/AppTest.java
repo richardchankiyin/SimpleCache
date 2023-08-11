@@ -22,7 +22,7 @@ public class AppTest
 	public void testNullFunction() {
 		new CacheImpl<String,String>(null);
 	}
-	@Test(expected=NullPointerException.class)
+	@Test(expected=IllegalStateException.class)
 	public void testFunctionFailed() {
 		Cache<String,String> c = new CacheImpl<String,String>(s->{ if ("fake".equals(s)) { throw new IllegalStateException(); } return "Input String:" + s; });
 		assertEquals("Input String:s", c.get("s"));
