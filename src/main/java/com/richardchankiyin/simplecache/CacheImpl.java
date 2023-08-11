@@ -31,13 +31,16 @@ public class CacheImpl<K,V> implements Cache<K, V> {
 		if (v == null) {
 			Integer ihashKey = Integer.valueOf(key.hashCode());
 			synchronized(ihashKey) {
-				V v2 = ic.get(key);
-				if (v2 == null) {
-					V v3 = function.apply(key);
-					ic.put(key, v3);
-					return v3;
-				} else {
+				if (!ic.containsKey(key)) {
+					V v2 = function.apply(key);
+					if (v2 == null) {
+						logger.warn("function: {} with key: {} returning null value", function, key);
+						throw new NullPointerException("function returning null");
+					}
+					ic.put(key, v2);
 					return v2;
+				} else {
+					return ic.get(key);
 				}
 			}
 		} else {
@@ -48,4 +51,6 @@ public class CacheImpl<K,V> implements Cache<K, V> {
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
 	}
+	
+	
 }

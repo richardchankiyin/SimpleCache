@@ -4,12 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Unit test for simple App.
  */
 public class AppTest 
 {
+	private final static Logger logger = LoggerFactory.getLogger(AppTest.class);
     /**
      * Test
      */
@@ -72,6 +75,28 @@ public class AppTest
     	t1.start(); t2.start(); t3.start(); t4.start();
     	t1.join(); t2.join(); t3.join(); t4.join();
     	
+    }
+    
+    @Test
+    public void testFunctionTriggeredOnlyOnce() throws Exception {
+    	class Count {
+    		int count = 0;
+    		public void add() { count++; }
+    		public int get() {return count;}
+    	}
+    	
+    	final Count count = new Count();
+    	
+    	Cache<String,String> c = new CacheImpl<String,String>(s->{logger.info("I am being triggered!!");count.add();return "process:"+s;});
+    	Runnable r = ()->{ assertEquals("process:v", c.get("v")); };
+    	Thread t1 = new Thread(r);
+    	Thread t2 = new Thread(r);
+    	Thread t3 = new Thread(r);
+    	Thread t4 = new Thread(r);
+    	t1.start(); t2.start(); t3.start(); t4.start();
+    	t1.join(); t2.join(); t3.join(); t4.join();
+    	
+    	assertEquals(1,count.get());
     }
 
 }
