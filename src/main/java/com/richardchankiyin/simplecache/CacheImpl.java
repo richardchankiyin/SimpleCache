@@ -19,13 +19,6 @@ public class CacheImpl<K,V> implements Cache<K, V> {
 		ic = new ConcurrentHashMap<>();
 	}
 	
-	private Integer hash(K key) {
-		// want to make use of valueof and only cache by -128 to 127
-		return Integer.valueOf((this.hashCode() * 31 * 31 + key.getClass().hashCode() * 31 
-				+ key.hashCode()) % 128);
-	}
-	
-	
 	@Override
 	public V get(K key) {
 		logger.debug("retrieving value from: {} for key: {}", ic, key);
@@ -33,26 +26,7 @@ public class CacheImpl<K,V> implements Cache<K, V> {
 			throw new NullPointerException("key is null");
 		}
 		
-		V v = ic.get(key);
-		if (v == null) {
-			Integer ihashKey = hash(key);
-			logger.debug("ihashkey: {}", ihashKey);
-			synchronized(ihashKey) {
-				if (!ic.containsKey(key)) {
-					V v2 = function.apply(key);
-					if (v2 == null) {
-						logger.warn("function: {} with key: {} returning null value", function, key);
-						throw new NullPointerException("function returning null");
-					}
-					ic.put(key, v2);
-					return v2;
-				} else {
-					return ic.get(key);
-				}
-			}
-		} else {
-			return v;
-		}
+		return ic.computeIfAbsent(key, k -> function.apply(k));
 	}
 
 	public String toString() {

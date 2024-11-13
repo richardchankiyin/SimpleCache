@@ -1,6 +1,7 @@
 package com.richardchankiyin.simplecache;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -31,10 +32,10 @@ public class AppTest
 		assertEquals("Input String:s", c.get("s"));
 		c.get("fake");
 	}
-	@Test(expected=NullPointerException.class)
+	@Test
 	public void testFunctionComputeNull() {
 		Cache<String,String> c = new CacheImpl<String,String>(s->null);
-		c.get("fake");
+		assertNull(c.get("fake"));
 	}
 	
     @Test
